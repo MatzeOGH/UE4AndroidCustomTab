@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+  <init>
+	<log text="Android custom tab init"/>
+  </init>
+
+  <gradleProperties>
+    <insert>
+      android.useAndroidX=true
+      android.enableJetifier=true
+    </insert>
+  </gradleProperties>
+  
+  <baseBuildGradleAdditions>
+  <insert>
+allprojects {
+  def mappings = [
+    'android.support.annotation': 'androidx.annotation',
+    'android.arch.lifecycle': 'androidx.lifecycle',
+    'android.support.v4.app.NotificationCompat': 'androidx.core.app.NotificationCompat',
+    'android.support.v4.app.NotificationManagerCompat': 'androidx.core.app.NotificationManagerCompat',
+    'android.support.v4.app.ActivityCompat': 'androidx.core.app.ActivityCompat',
+    'android.support.v4.content.ContextCompat': 'androidx.core.content.ContextCompat',
+    'android.support.v4.content.FileProvider': 'androidx.core.content.FileProvider',
+    'android.support.v13.app.FragmentCompat': 'androidx.legacy.app.FragmentCompat',
+    'android.arch.lifecycle.Lifecycle': 'androidx.lifecycle.Lifecycle',
+    'android.arch.lifecycle.LifecycleObserver': 'androidx.lifecycle.LifecycleObserver',
+    'android.arch.lifecycle.OnLifecycleEvent': 'androidx.lifecycle.OnLifecycleEvent',
+    'android.arch.lifecycle.ProcessLifecycleOwner': 'androidx.lifecycle.ProcessLifecycleOwner',
+  ]
+
+  beforeEvaluate { project ->
+    project.rootProject.projectDir.traverse(type: groovy.io.FileType.FILES, nameFilter: ~/.*\.java$/) { f ->
+      mappings.each { entry ->
+        if (f.getText('UTF-8').contains(entry.key)) {
+          println "Updating ${entry.key} to ${entry.value} in file ${f}"
+          ant.replace(file: f, token: entry.key, value: entry.value)
+        }
+      }
+    }
+  }
+}
+  </insert>
+</baseBuildGradleAdditions>
+
+  
+  <buildGradleAdditions>
+    <insert>
+      dependencies {
+      implementation "androidx.browser:browser:1.2.0"
+      }
+    </insert>
+  </buildGradleAdditions>
+
+  <proguardAdditions>
+	<insert>
+	</insert>
+  </proguardAdditions>
+  
+  <resourceCopies>
+  </resourceCopies>
+	
+  <gameActivityImportAdditions>
+	<insert>
+import androidx.browser.customtabs.CustomTabsIntent;
+  </insert>
+  </gameActivityImportAdditions>
+
+  <androidManifestUpdates>
+  </androidManifestUpdates>
+
+  <gameActivityClassAdditions>
+	<insert>
+public void AndroidThunkJava_OpenNativeTab(final String url) {
+      final NativeActivity activity = this;
+      runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+      CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+      builder.addDefaultShareMenuItem();
+      CustomTabsIntent customTabsIntent = builder.build();
+      customTabsIntent.launchUrl(activity, Uri.parse(url)); 
+      }
+      });
+}
+  </insert>
+  </gameActivityClassAdditions>
+</root>

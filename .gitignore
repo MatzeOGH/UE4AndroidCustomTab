@@ -1,0 +1,12 @@
+/.vs
+/.idea
+/Saved
+/Intermediate
+/Packages
+/Binaries
+/DerivedDataCache
+
+
+*.pdb
+*.sln
+
